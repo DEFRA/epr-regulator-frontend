@@ -20,6 +20,8 @@ describe('#homeController', () => {
     })
 
     expect(result).toEqual(expect.stringContaining('Home |'))
+    expect(result).toEqual(expect.stringContaining('Regulator Dashboard'))
+    expect(result).toEqual(expect.stringContaining('href="/regulator/home"'))
     expect(statusCode).toBe(statusCodes.ok)
   })
 })
