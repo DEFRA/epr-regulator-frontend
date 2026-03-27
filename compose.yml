@@ -47,7 +47,7 @@ services:
   your-frontend:
     build: ./
     ports:
-      - '3000:3000'
+      - '7154:7154'
     links:
       - 'localstack:localstack'
       - 'redis:redis'
@@ -59,7 +59,7 @@ services:
     env_file:
       - 'compose/aws.env'
     environment:
-      PORT: 3000
+      PORT: 7154
       NODE_ENV: development
       REDIS_HOST: redis
       LOCALSTACK_ENDPOINT: http://localstack:4566

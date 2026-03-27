@@ -1,6 +1,7 @@
 import path from 'path'
 import hapi from '@hapi/hapi'
 import Scooter from '@hapi/scooter'
+import bell from '@hapi/bell'
 
 import { router } from './router.js'
 import { config } from '../config/config.js'
@@ -55,6 +56,7 @@ export async function createServer() {
     }
   })
   await server.register([
+    bell,
     requestLogger,
     requestTracing,
     metrics,
@@ -63,7 +65,49 @@ export async function createServer() {
     sessionCache,
     nunjucksConfig,
     Scooter,
-    contentSecurityPolicy,
+    contentSecurityPolicy
+  ])
+
+  const azureAdB2cConfig = config.get('auth.azureAdB2c')
+
+  if (config.get('isTest')) {
+    server.auth.scheme('mock', () => ({
+      authenticate: (_request, h) =>
+        h.authenticated({ credentials: { user: 'mock-user' } })
+    }))
+    server.auth.strategy('azure-ad-b2c', 'mock')
+  } else {
+    server.auth.strategy('azure-ad-b2c', 'bell', {
+      provider: {
+        name: 'azure-ad-b2c',
+        protocol: 'oauth2',
+        useParamsAuth: true,
+        auth:
+          azureAdB2cConfig.instance && azureAdB2cConfig.domain
+            ? `${azureAdB2cConfig.instance}/${azureAdB2cConfig.domain}/${azureAdB2cConfig.userFlow}/oauth2/v2.0/authorize`
+            : `https://${azureAdB2cConfig.tenantName}.b2clogin.com/${azureAdB2cConfig.tenantName}.onmicrosoft.com/${azureAdB2cConfig.userFlow}/oauth2/v2.0/authorize`,
+        token:
+          azureAdB2cConfig.instance && azureAdB2cConfig.domain
+            ? `${azureAdB2cConfig.instance}/${azureAdB2cConfig.domain}/${azureAdB2cConfig.userFlow}/oauth2/v2.0/token`
+            : `https://${azureAdB2cConfig.tenantName}.b2clogin.com/${azureAdB2cConfig.tenantName}.onmicrosoft.com/${azureAdB2cConfig.userFlow}/oauth2/v2.0/token`,
+        scope: ['openid', 'offline_access', 'profile']
+      },
+      password: azureAdB2cConfig.cookiePassword,
+      clientId: azureAdB2cConfig.clientId,
+      clientSecret: azureAdB2cConfig.clientSecret,
+      isSecure: azureAdB2cConfig.isSecure,
+      location: azureAdB2cConfig.redirectUri || undefined,
+      config: {
+        tenant: azureAdB2cConfig.tenantId || azureAdB2cConfig.domain,
+        discovery:
+          azureAdB2cConfig.instance && azureAdB2cConfig.domain
+            ? `${azureAdB2cConfig.instance}/${azureAdB2cConfig.domain}/${azureAdB2cConfig.userFlow}/v2.0/.well-known/openid-configuration`
+            : `https://${azureAdB2cConfig.tenantName}.b2clogin.com/${azureAdB2cConfig.tenantName}.onmicrosoft.com/${azureAdB2cConfig.userFlow}/v2.0/.well-known/openid-configuration`
+      }
+    })
+  }
+
+  await server.register([
     router // Register all the controllers/routes defined in src/server/router.js
   ])
 
