@@ -14,17 +14,23 @@ describe('#homeController', () => {
   })
 
   test('Should provide expected response', async () => {
+    const signinResponse = await server.inject({
+      method: 'GET',
+      url: '/regulators/signin-oidc'
+    })
+    const setCookie = signinResponse.headers['set-cookie'] ?? []
+    const sessionCookie = []
+      .concat(setCookie)
+      .map((c) => c.split(';')[0])
+      .join('; ')
+
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/regulator/home'
+      url: '/regulators/home',
+      headers: { cookie: sessionCookie }
     })
 
-    expect(result).toEqual(expect.stringContaining('Regulator Dashboard |'))
-    expect(result).toEqual(
-      expect.stringContaining(
-        'This is the regulator page, accessible only to authenticated users.'
-      )
-    )
+    expect(result).toEqual(expect.stringContaining('Regulator Dashboard'))
     expect(result).toEqual(expect.stringContaining('Log out'))
     expect(result).toEqual(expect.stringContaining('href="/logout"'))
     expect(statusCode).toBe(statusCodes.ok)

@@ -10,7 +10,8 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <div class="govuk-body" data-testid="regulator-page-body">
-        <p>This is the regulator page, accessible only to authenticated users.</p>
+        <h1>Regulator Dashboard</h1>
+        <pre>{{ user | dump(2) }}</pre>
       </div>
 
       {{ govukButton({
