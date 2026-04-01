@@ -18,6 +18,22 @@ import { secureContext } from '@defra/hapi-secure-context'
 import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
 import { metrics } from '@defra/cdp-metrics'
 
+/**
+ * Bell `location` must be the app origin. `AZURE_AD_B2C_REDIRECT_URI` may be a
+ * full URL or a path (e.g. /login/b2c/callback); only absolute URLs work with `new URL()`.
+ */
+function bellRedirectOrigin(redirectUri, tls) {
+  if (!redirectUri) return undefined
+  if (/^https?:\/\//i.test(redirectUri)) {
+    return new URL(redirectUri).origin
+  }
+  const scheme = tls ? 'https' : 'http'
+  const host = config.get('host')
+  const hostForUrl = host === '0.0.0.0' ? 'localhost' : host
+  const base = `${scheme}://${hostForUrl}:${config.get('port')}`
+  return new URL(redirectUri, base).origin
+}
+
 export async function createServer() {
   setupProxy()
   const isDevelopment = config.get('isDevelopment')
@@ -117,9 +133,7 @@ export async function createServer() {
       clientId: azureAdB2cConfig.clientId,
       clientSecret: azureAdB2cConfig.clientSecret,
       isSecure: azureAdB2cConfig.isSecure,
-      location: azureAdB2cConfig.redirectUri
-        ? new URL(azureAdB2cConfig.redirectUri).origin
-        : undefined,
+      location: bellRedirectOrigin(azureAdB2cConfig.redirectUri, tls),
       config: {
         tenant: azureAdB2cConfig.tenantId || azureAdB2cConfig.domain,
         discovery:

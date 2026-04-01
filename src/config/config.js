@@ -1,10 +1,15 @@
 import convict from 'convict'
+import dotenv from 'dotenv'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import convictFormatWithValidator from 'convict-format-with-validator'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({
+  path: path.join(dirname, '../../.env'),
+  quiet: true
+})
 
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
@@ -260,7 +265,7 @@ export const config = convict({
         env: 'AZURE_AD_B2C_TENANT_ID'
       },
       redirectUri: {
-        doc: 'Azure AD B2C Redirect URI (optional)',
+        doc: 'OAuth redirect path or full URL (e.g. /login/b2c/callback or http://localhost:7154/login/b2c/callback). Optional.',
         format: String,
         default: '',
         env: 'AZURE_AD_B2C_REDIRECT_URI'
