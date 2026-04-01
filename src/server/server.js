@@ -1,6 +1,8 @@
+import fs from 'node:fs'
 import path from 'path'
 import hapi from '@hapi/hapi'
 import Scooter from '@hapi/scooter'
+import bell from '@hapi/bell'
 
 import { router } from './router.js'
 import { config } from '../config/config.js'
@@ -18,9 +20,20 @@ import { metrics } from '@defra/cdp-metrics'
 
 export async function createServer() {
   setupProxy()
+  const isDevelopment = config.get('isDevelopment')
+  const certsDir = path.resolve(config.get('root'), 'certs')
+  const tls =
+    isDevelopment && fs.existsSync(path.join(certsDir, 'localhost-key.pem'))
+      ? {
+          key: fs.readFileSync(path.join(certsDir, 'localhost-key.pem')),
+          cert: fs.readFileSync(path.join(certsDir, 'localhost-cert.pem'))
+        }
+      : undefined
+
   const server = hapi.server({
     host: config.get('host'),
     port: config.get('port'),
+    tls,
     routes: {
       validate: {
         options: {
@@ -55,6 +68,7 @@ export async function createServer() {
     }
   })
   await server.register([
+    bell,
     requestLogger,
     requestTracing,
     metrics,
@@ -63,7 +77,60 @@ export async function createServer() {
     sessionCache,
     nunjucksConfig,
     Scooter,
-    contentSecurityPolicy,
+    contentSecurityPolicy
+  ])
+
+  const azureAdB2cConfig = config.get('auth.azureAdB2c')
+
+  if (config.get('isTest')) {
+    server.auth.scheme('mock', () => ({
+      authenticate: (_request, h) =>
+        h.authenticated({ credentials: { user: 'mock-user' } })
+    }))
+    server.auth.strategy('azure-ad-b2c', 'mock')
+  } else {
+    server.auth.strategy('azure-ad-b2c', 'bell', {
+      provider: {
+        name: 'azure-ad-b2c',
+        protocol: 'oauth2',
+        useParamsAuth: true,
+        auth:
+          azureAdB2cConfig.instance && azureAdB2cConfig.domain
+            ? `${azureAdB2cConfig.instance}/${azureAdB2cConfig.domain}/${azureAdB2cConfig.userFlow}/oauth2/v2.0/authorize`
+            : `https://${azureAdB2cConfig.tenantName}.b2clogin.com/${azureAdB2cConfig.tenantName}.onmicrosoft.com/${azureAdB2cConfig.userFlow}/oauth2/v2.0/authorize`,
+        token:
+          azureAdB2cConfig.instance && azureAdB2cConfig.domain
+            ? `${azureAdB2cConfig.instance}/${azureAdB2cConfig.domain}/${azureAdB2cConfig.userFlow}/oauth2/v2.0/token`
+            : `https://${azureAdB2cConfig.tenantName}.b2clogin.com/${azureAdB2cConfig.tenantName}.onmicrosoft.com/${azureAdB2cConfig.userFlow}/oauth2/v2.0/token`,
+        scope: ['openid', 'profile', 'offline_access'],
+        profile(_credentials, params) {
+          const idToken = params.id_token
+          if (!idToken) return
+          const payload = idToken.split('.')[1]
+          const claims = JSON.parse(
+            Buffer.from(payload, 'base64url').toString('utf8')
+          )
+          _credentials.profile = claims
+        }
+      },
+      password: azureAdB2cConfig.cookiePassword,
+      clientId: azureAdB2cConfig.clientId,
+      clientSecret: azureAdB2cConfig.clientSecret,
+      isSecure: azureAdB2cConfig.isSecure,
+      location: azureAdB2cConfig.redirectUri
+        ? new URL(azureAdB2cConfig.redirectUri).origin
+        : undefined,
+      config: {
+        tenant: azureAdB2cConfig.tenantId || azureAdB2cConfig.domain,
+        discovery:
+          azureAdB2cConfig.instance && azureAdB2cConfig.domain
+            ? `${azureAdB2cConfig.instance}/${azureAdB2cConfig.domain}/${azureAdB2cConfig.userFlow}/v2.0/.well-known/openid-configuration`
+            : `https://${azureAdB2cConfig.tenantName}.b2clogin.com/${azureAdB2cConfig.tenantName}.onmicrosoft.com/${azureAdB2cConfig.userFlow}/v2.0/.well-known/openid-configuration`
+      }
+    })
+  }
+
+  await server.register([
     router // Register all the controllers/routes defined in src/server/router.js
   ])
 

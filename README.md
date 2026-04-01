@@ -155,7 +155,7 @@ docker build --target development --no-cache --tag epr-regulator-frontend:develo
 Run:
 
 ```bash
-docker run -p 3000:3000 epr-regulator-frontend:development
+docker run -p 7154:7154 epr-regulator-frontend:development
 ```
 
 ### Production image
@@ -169,7 +169,7 @@ docker build --no-cache --tag epr-regulator-frontend .
 Run:
 
 ```bash
-docker run -p 3000:3000 epr-regulator-frontend
+docker run -p 7154:7154 epr-regulator-frontend
 ```
 
 ### Docker Compose
