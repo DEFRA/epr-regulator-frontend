@@ -23,7 +23,7 @@ echo "Checking for any process running on port $PORT..."
 PID=$(lsof -ti :$PORT)
 if [ -n "$PID" ]; then
   echo "Terminating process $PID running on port $PORT..."
-  kill -9 $PID
+  kill -9 "$PID"
 fi
 
 # Run the application
