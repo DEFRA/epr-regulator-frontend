@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import path from 'path'
+import path from 'node:path'
 import hapi from '@hapi/hapi'
 import Scooter from '@hapi/scooter'
 import bell from '@hapi/bell'
@@ -19,13 +19,20 @@ import { contentSecurityPolicy } from './common/helpers/content-security-policy.
 import { metrics } from '@defra/cdp-metrics'
 
 /**
- * Bell `location` must be the app origin. `AZURE_AD_B2C_REDIRECT_URI` may be a
- * full URL or a path (e.g. /login/b2c/callback); only absolute URLs work with `new URL()`.
+ * Bell `location` must be the app origin (see `@hapi/bell`: redirect_uri = location + request.path).
+ * `AZURE_AD_B2C_REDIRECT_URI` may be a full URL or a path.
+ *
+ * If the env URL uses `http://` but this process serves HTTPS (dev certs), use `https` for the
+ * origin so B2C receives a redirect_uri that matches typical registrations.
  */
 function bellRedirectOrigin(redirectUri, tls) {
   if (!redirectUri) return undefined
   if (/^https?:\/\//i.test(redirectUri)) {
-    return new URL(redirectUri).origin
+    const u = new URL(redirectUri)
+    if (tls && u.protocol === 'http:') {
+      u.protocol = 'https:'
+    }
+    return u.origin
   }
   const scheme = tls ? 'https' : 'http'
   const host = config.get('host')

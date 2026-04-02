@@ -1,7 +1,8 @@
 import {
   homeController,
   signinOidcController,
-  logoutController
+  signOutController,
+  signedOutController
 } from './controller.js'
 
 export const regulators = {
@@ -28,7 +29,18 @@ export const regulators = {
         {
           method: 'GET',
           path: '/logout',
-          ...logoutController
+          options: {
+            auth: false,
+            ...signOutController
+          }
+        },
+        {
+          method: 'GET',
+          path: '/signed-out',
+          options: {
+            auth: false,
+            ...signedOutController
+          }
         }
       ])
     }

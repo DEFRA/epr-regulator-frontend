@@ -265,10 +265,16 @@ export const config = convict({
         env: 'AZURE_AD_B2C_TENANT_ID'
       },
       redirectUri: {
-        doc: 'OAuth redirect path or full URL (e.g. /login/b2c/callback or http://localhost:7154/login/b2c/callback). Optional.',
+        doc: 'OAuth redirect path or full URL (e.g. /login/b2c/callback or https://localhost:7154/login/b2c/callback). Optional.',
         format: String,
         default: '',
         env: 'AZURE_AD_B2C_REDIRECT_URI'
+      },
+      postLogoutRedirectPath: {
+        doc: 'Path or absolute URL for B2C post_logout_redirect_uri (must be registered on the app registration).',
+        format: String,
+        default: '/signed-out',
+        env: 'AZURE_AD_B2C_POST_LOGOUT_REDIRECT_PATH'
       },
       cookiePassword: {
         doc: 'Auth cookie password',
