@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import path from 'path'
+import path from 'node:path'
 import hapi from '@hapi/hapi'
 import Scooter from '@hapi/scooter'
 import bell from '@hapi/bell'
@@ -17,6 +17,29 @@ import { getCacheEngine } from './common/helpers/session-cache/cache-engine.js'
 import { secureContext } from '@defra/hapi-secure-context'
 import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
 import { metrics } from '@defra/cdp-metrics'
+
+/**
+ * Bell `location` must be the app origin (see `@hapi/bell`: redirect_uri = location + request.path).
+ * `AZURE_AD_B2C_REDIRECT_URI` may be a full URL or a path.
+ *
+ * If the env URL uses `http://` but this process serves HTTPS (dev certs), use `https` for the
+ * origin so B2C receives a redirect_uri that matches typical registrations.
+ */
+function bellRedirectOrigin(redirectUri, tls) {
+  if (!redirectUri) return undefined
+  if (/^https?:\/\//i.test(redirectUri)) {
+    const u = new URL(redirectUri)
+    if (tls && u.protocol === 'http:') {
+      u.protocol = 'https:'
+    }
+    return u.origin
+  }
+  const scheme = tls ? 'https' : 'http'
+  const host = config.get('host')
+  const hostForUrl = host === '0.0.0.0' ? 'localhost' : host
+  const base = `${scheme}://${hostForUrl}:${config.get('port')}`
+  return new URL(redirectUri, base).origin
+}
 
 export async function createServer() {
   setupProxy()
@@ -117,9 +140,7 @@ export async function createServer() {
       clientId: azureAdB2cConfig.clientId,
       clientSecret: azureAdB2cConfig.clientSecret,
       isSecure: azureAdB2cConfig.isSecure,
-      location: azureAdB2cConfig.redirectUri
-        ? new URL(azureAdB2cConfig.redirectUri).origin
-        : undefined,
+      location: bellRedirectOrigin(azureAdB2cConfig.redirectUri, tls),
       config: {
         tenant: azureAdB2cConfig.tenantId || azureAdB2cConfig.domain,
         discovery:
