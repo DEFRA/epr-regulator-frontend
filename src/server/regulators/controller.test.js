@@ -46,7 +46,8 @@ describe('#homeController', () => {
     const { location } = response.headers
     expect(
       location === '/signed-out' ||
-        (typeof location === 'string' && location.includes('oauth2/v2.0/logout'))
+        (typeof location === 'string' &&
+          location.includes('oauth2/v2.0/logout'))
     ).toBe(true)
   })
 

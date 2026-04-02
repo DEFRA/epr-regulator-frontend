@@ -25,7 +25,10 @@ export function getB2cAuthorityPrefix(cfg) {
  * @param {string} authorityPrefix - from {@link getB2cAuthorityPrefix}
  * @param {string} [postLogoutRedirectAbsoluteUrl] - optional `post_logout_redirect_uri` (must be registered in B2C)
  */
-export function buildB2cLogoutUrl(authorityPrefix, postLogoutRedirectAbsoluteUrl) {
+export function buildB2cLogoutUrl(
+  authorityPrefix,
+  postLogoutRedirectAbsoluteUrl
+) {
   const base = `${authorityPrefix}/oauth2/v2.0/logout`
   if (!postLogoutRedirectAbsoluteUrl) {
     return base
@@ -73,7 +76,9 @@ export function resolvePostLogoutAbsoluteUri(request, pathOrUrl, azureConfig) {
     }
     return new URL(path, u.origin).href
   }
-  const proto = firstForwarded(request.headers['x-forwarded-proto']) || request.server.info.protocol
+  const proto =
+    firstForwarded(request.headers['x-forwarded-proto']) ||
+    request.server.info.protocol
   const host =
     firstForwarded(request.headers['x-forwarded-host']) ||
     request.headers.host ||

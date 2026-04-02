@@ -42,7 +42,11 @@ export const signOutController = {
     const azure = config.get('auth.azureAdB2c')
     const prefix = getB2cAuthorityPrefix(azure)
     const pathOrUrl = azure.postLogoutRedirectPath || '/signed-out'
-    const postLogoutUri = resolvePostLogoutAbsoluteUri(request, pathOrUrl, azure)
+    const postLogoutUri = resolvePostLogoutAbsoluteUri(
+      request,
+      pathOrUrl,
+      azure
+    )
 
     if (!prefix) {
       return h.redirect('/signed-out')
