@@ -18,13 +18,5 @@ export AUTH_COOKIE_SECURE="false" # Set to false for local HTTP development
 export PORT=7154
 export NODE_ENV="development"
 
-# Terminate anything running on the application port
-echo "Checking for any process running on port $PORT..."
-PID=$(lsof -ti :$PORT)
-if [ -n "$PID" ]; then
-  echo "Terminating process $PID running on port $PORT..."
-  kill -9 "$PID"
-fi
-
 # Run the application
 npm run dev
