@@ -9,9 +9,39 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <div class="govuk-body" data-testid="regulator-page-body">
-        <h1>Regulator Dashboard</h1>
-        <pre>{{ user | dump(2) }}</pre>
+      <div class="govuk-body" data-testid="regulator-home__content">
+        {% if accountDetailsError %}
+          <p class="govuk-body" data-testid="regulator-home__account-details-error">{{ accountDetailsError }}</p>
+        {% endif %}
+
+        {% if accountDetails %}
+          <dl class="govuk-summary-list" data-testid="regulator-home__account-details">
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">First name</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-first-name">
+                {{ accountDetails.firstName or accountDetails.givenName or '' }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Last name</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-last-name">
+                {{ accountDetails.lastName or accountDetails.familyName or '' }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Environment agency</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-environment-agency">
+                {{ accountDetails.environmentAgency or accountDetails.agency or accountDetails.organisation or '' }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Nation</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-nation">
+                {{ accountDetails.nation or accountDetails.country or '' }}
+              </dd>
+            </div>
+          </dl>
+        {% endif %}
       </div>
 
       {{ govukButton({

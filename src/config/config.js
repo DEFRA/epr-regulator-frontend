@@ -290,6 +290,16 @@ export const config = convict({
         env: 'AUTH_COOKIE_SECURE'
       }
     }
+  },
+  services: {
+    accountApi: {
+      baseUrl: {
+        doc: 'Account API base URL (e.g. http://localhost:8085)',
+        format: String,
+        default: 'http://localhost:8085',
+        env: 'ACCOUNT_API_BASE_URL'
+      }
+    }
   }
 })
 
