@@ -7,7 +7,8 @@ import {
 } from '../auth/azure-ad-b2c.js'
 import {
   getAccountDetails,
-  getAccountUserIdFromSessionUser
+  getAccountUserIdFromSessionUser,
+  mapAccountDetailsDtoToViewModel
 } from '../common/services/account-details.js'
 
 /**
@@ -26,7 +27,20 @@ export const homeController = {
 
     if (userId) {
       try {
-        accountDetails = await getAccountDetails(userId)
+        const dto = await getAccountDetails(userId)
+        accountDetails = mapAccountDetailsDtoToViewModel(dto)
+        if (
+          !accountDetails ||
+          (accountDetails.firstName === '' &&
+            accountDetails.lastName === '' &&
+            accountDetails.environmentAgency === '' &&
+            accountDetails.nation === '' &&
+            accountDetails.nationId === undefined &&
+            accountDetails.serviceRoleId === undefined)
+        ) {
+          accountDetails = undefined
+          accountDetailsError = 'We could not load your account details.'
+        }
       } catch (err) {
         request.logger?.error({ err }, 'Failed to load account details')
         accountDetailsError = 'We could not load your account details.'

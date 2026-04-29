@@ -19,10 +19,14 @@ describe('#homeController', () => {
       statusText: 'OK',
       async json() {
         return {
-          firstName: 'Test',
-          lastName: 'User',
-          environmentAgency: 'Environment Agency',
-          nation: 'England'
+          userId: 'a586e22f-0df0-4a24-8048-ae7d0aabbbbc',
+          firstName: 'Carl',
+          lastName: 'Mason',
+          organisationName: 'Carl_BUG_TESTING',
+          nationId: 1,
+          serviceRoleId: 4,
+          serviceRole: 'Regulator Admin',
+          contactEmail: 'eprqatest+RegulatorNation1@gmail.com'
         }
       }
     }))
@@ -60,10 +64,26 @@ describe('#homeController', () => {
     expect(result).toEqual(
       expect.stringContaining('regulator-home__account-details')
     )
-    expect(result).toEqual(expect.stringContaining('Test'))
-    expect(result).toEqual(expect.stringContaining('User'))
-    expect(result).toEqual(expect.stringContaining('Environment Agency'))
+    expect(result).toEqual(expect.stringContaining('Carl'))
+    expect(result).toEqual(expect.stringContaining('Mason'))
+    expect(result).toEqual(expect.stringContaining('Carl_BUG_TESTING'))
     expect(result).toEqual(expect.stringContaining('England'))
+    expect(result).toEqual(
+      expect.stringContaining('regulator-home__account-service-role-id')
+    )
+    expect(result).toEqual(
+      expect.stringContaining('regulator-home__account-nation-id')
+    )
+    expect(result).toEqual(
+      expect.stringContaining(
+        'data-testid="regulator-home__account-service-role-id">\n                4'
+      )
+    )
+    expect(result).toEqual(
+      expect.stringContaining(
+        'data-testid="regulator-home__account-nation-id">\n                1'
+      )
+    )
     expect(result).toEqual(expect.stringContaining('Log out'))
     expect(result).toEqual(expect.stringContaining('href="/logout"'))
     expect(statusCode).toBe(statusCodes.ok)
