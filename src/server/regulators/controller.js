@@ -27,14 +27,15 @@ export const homeController = {
 
     if (userId) {
       try {
-        const dto = await getAccountDetails(userId)
+        const dto = await getAccountDetails(userId, {
+          logger: request.logger
+        })
         accountDetails = mapAccountDetailsDtoToViewModel(dto)
         if (
           !accountDetails ||
           (accountDetails.firstName === '' &&
             accountDetails.lastName === '' &&
-            accountDetails.environmentAgency === '' &&
-            accountDetails.nation === '' &&
+            accountDetails.organisationName === '' &&
             accountDetails.nationId === undefined &&
             accountDetails.serviceRoleId === undefined)
         ) {

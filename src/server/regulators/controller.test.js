@@ -67,7 +67,6 @@ describe('#homeController', () => {
     expect(result).toEqual(expect.stringContaining('Carl'))
     expect(result).toEqual(expect.stringContaining('Mason'))
     expect(result).toEqual(expect.stringContaining('Carl_BUG_TESTING'))
-    expect(result).toEqual(expect.stringContaining('England'))
     expect(result).toEqual(
       expect.stringContaining('regulator-home__account-service-role-id')
     )

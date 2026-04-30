@@ -6,19 +6,15 @@ function asNonEmptyString(value) {
   return v || undefined
 }
 
-function nationNameFromNationId(nationId) {
-  switch (nationId) {
-    case 1:
-      return 'England'
-    case 2:
-      return 'Northern Ireland'
-    case 3:
-      return 'Scotland'
-    case 4:
-      return 'Wales'
-    default:
-      return undefined
-  }
+function asGuidString(value) {
+  const v = asNonEmptyString(value)
+  if (!v) return undefined
+  // Accept canonical GUIDs (with or without braces) and normalise to plain GUID.
+  const m =
+    /^\{?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}?$/i.exec(
+      v
+    )
+  return m ? m[1] : undefined
 }
 
 export function getAccountUserIdFromSessionUser(sessionUser) {
@@ -38,16 +34,16 @@ export function getAccountUserIdFromSessionUser(sessionUser) {
         : {}
 
   return (
-    asNonEmptyString(profile.oid) ||
-    asNonEmptyString(profile.sub) ||
-    asNonEmptyString(profile.userId) ||
-    asNonEmptyString(profile.id) ||
-    asNonEmptyString(credentials.userId) ||
-    asNonEmptyString(credentials.user) ||
-    asNonEmptyString(credentials.id) ||
-    asNonEmptyString(sessionUser.userId) ||
-    asNonEmptyString(sessionUser.user) ||
-    asNonEmptyString(sessionUser.id)
+    asGuidString(profile.oid) ||
+    asGuidString(profile.sub) ||
+    asGuidString(profile.userId) ||
+    asGuidString(profile.id) ||
+    asGuidString(credentials.userId) ||
+    asGuidString(credentials.user) ||
+    asGuidString(credentials.id) ||
+    asGuidString(sessionUser.userId) ||
+    asGuidString(sessionUser.user) ||
+    asGuidString(sessionUser.id)
   )
 }
 
@@ -95,27 +91,31 @@ export function mapAccountDetailsDtoToViewModel(dto) {
       typeof user.serviceRoleId === 'number' ? user.serviceRoleId : undefined,
     email:
       asNonEmptyString(user.email) || asNonEmptyString(user.contactEmail) || '',
-    environmentAgency:
+    organisationName:
       asNonEmptyString(primaryOrganisation.name) ||
       asNonEmptyString(user.organisationName) ||
       '',
-    nationId,
-    nation: nationNameFromNationId(nationId) || ''
+    nationId
   }
 }
 
-export async function getAccountDetails(userId, { headers } = {}) {
+export async function getAccountDetails(userId, { headers, logger } = {}) {
   const baseUrl =
     config.get('services.accountApi.baseUrl') || 'http://localhost:8085'
-  const url = new URL(
-    `/api/account/details/${encodeURIComponent(userId)}`,
-    baseUrl
-  )
+  const url = new URL(`/api/account/${encodeURIComponent(userId)}`, baseUrl)
 
   const fetchFn = globalThis.fetch
   if (typeof fetchFn !== 'function') {
     throw new Error('fetch is not available in this runtime')
   }
+
+  logger?.debug?.(
+    {
+      url: url.toString(),
+      hasHeaders: Boolean(headers && typeof headers === 'object')
+    },
+    'Fetching account details from gateway'
+  )
 
   const res = await fetchFn(url, {
     method: 'GET',
