@@ -13,6 +13,7 @@ Core delivery platform Node.js Frontend Template.
 - [Local Development](#local-development)
   - [Setup](#setup)
   - [Development](#development)
+  - [HTTPS for local development](#https-for-local-development)
   - [Production](#production)
   - [Npm scripts](#npm-scripts)
   - [Update dependencies](#update-dependencies)
@@ -99,6 +100,37 @@ To run the application in `development` mode run:
 ```bash
 npm run dev
 ```
+
+### HTTPS for local development
+
+Azure AD B2C will only redirect back to an HTTPS URL, so the app needs to serve
+HTTPS locally for end-to-end auth flows to work.
+
+The server enables TLS automatically when **both** are true:
+
+1. `NODE_ENV=development` (set by `npm run dev` and `nodemon.json`)
+2. `certs/localhost-key.pem` and `certs/localhost-cert.pem` exist at the repo root
+
+In production the app continues to serve plain HTTP behind an edge terminator —
+this branch is dev-only.
+
+To generate a trusted local cert pair, install [mkcert] and run:
+
+```bash
+npm run setup:certs
+```
+
+Then start the app as normal:
+
+```bash
+npm run dev
+```
+
+The startup log will show `https://localhost:7154` once TLS is active. You will
+also want to set `AUTH_COOKIE_SECURE=true` in `run-dev.sh` so the session cookie
+is marked secure.
+
+[mkcert]: https://github.com/FiloSottile/mkcert
 
 ### Production
 
