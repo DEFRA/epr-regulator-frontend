@@ -43,6 +43,8 @@ cd epr-regulator-frontend
 nvm use
 ```
 
+You can alternatively use [mise-en-place](https://mise.jdx.dev/) with [`idiomatic_version_file_enable_tools`](https://mise.jdx.dev/configuration.html#idiomatic-version-files) enabled which will respect the [`.nvmrc`](.nvmrc).
+
 ## Server-side Caching
 
 We use Catbox for server-side caching. By default the service will use CatboxRedis when deployed and CatboxMemory for
@@ -99,6 +101,8 @@ npm install
 [`flake.nix`](./flake.nix) provides a dev shell with tools used by this repo.
 
 Run `nix develop` or use [direnv](https://direnv.net/) to activate the development tools for this repo
+
+We have not added nodejs to the nix shell, preferring nvm/mise due to more precise version pinning in order to to avoid unexpected behaviour differences across minor node versions.
 
 ### Development
 
