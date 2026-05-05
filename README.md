@@ -12,6 +12,7 @@ Core delivery platform Node.js Frontend Template.
 - [Redis](#redis)
 - [Local Development](#local-development)
   - [Setup](#setup)
+    - [Nix dev shell (optional)](#nix-dev-shell-optional)
   - [Development](#development)
   - [HTTPS for local development](#https-for-local-development)
   - [Production](#production)
@@ -92,6 +93,12 @@ Install application dependencies:
 ```bash
 npm install
 ```
+
+#### Nix dev shell (optional)
+
+[`flake.nix`](./flake.nix) provides a dev shell with tools used by this repo.
+
+Run `nix develop` or use [direnv](https://direnv.net/) to activate the development tools for this repo
 
 ### Development
 
