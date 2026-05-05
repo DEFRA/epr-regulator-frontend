@@ -9,9 +9,45 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <div class="govuk-body" data-testid="regulator-page-body">
-        <h1>Regulator Dashboard</h1>
-        <pre>{{ user | dump(2) }}</pre>
+      <div class="govuk-body" data-testid="regulator-home__content">
+        {% if accountDetailsError %}
+          <p class="govuk-body" data-testid="regulator-home__account-details-error">{{ accountDetailsError }}</p>
+        {% endif %}
+
+        {% if accountDetails %}
+          <dl class="govuk-summary-list" data-testid="regulator-home__account-details">
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">First name</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-first-name">
+                {{ accountDetails.firstName }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Last name</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-last-name">
+                {{ accountDetails.lastName }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Organisation name</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-organisation-name">
+                {{ accountDetails.organisationName }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Service role ID</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-service-role-id">
+                {{ accountDetails.serviceRoleId }}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Nation ID</dt>
+              <dd class="govuk-summary-list__value" data-testid="regulator-home__account-nation-id">
+                {{ accountDetails.nationId }}
+              </dd>
+            </div>
+          </dl>
+        {% endif %}
       </div>
 
       {{ govukButton({

@@ -9,6 +9,7 @@ export AZURE_AD_B2C_DOMAIN="example.onmicrosoft.com"
 export AZURE_AD_B2C_USER_FLOW="{{USER_FLOW}}"
 # export AZURE_AD_B2C_TENANT_ID="your-tenant-id-guid" # Optional if DOMAIN is provided
 export AZURE_AD_B2C_REDIRECT_URI="{{redirect_uri}}" # Optional: Explicit redirect URI
+export ACCOUNT_API_BASE_URL=""
 
 # Authentication Cookie Configuration
 # export AUTH_COOKIE_PASSWORD="at-least-32-characters-long-secret-password"

@@ -108,7 +108,14 @@ export async function createServer() {
   if (config.get('isTest')) {
     server.auth.scheme('mock', () => ({
       authenticate: (_request, h) =>
-        h.authenticated({ credentials: { user: 'mock-user' } })
+        h.authenticated({
+          credentials: {
+            token: 'mock-access-token',
+            profile: {
+              oid: 'a586e22f-0df0-4a24-8048-ae7d0aabbbbc'
+            }
+          }
+        })
     }))
     server.auth.strategy('azure-ad-b2c', 'mock')
   } else {
@@ -130,10 +137,9 @@ export async function createServer() {
           const idToken = params.id_token
           if (!idToken) return
           const payload = idToken.split('.')[1]
-          const claims = JSON.parse(
+          _credentials.profile = JSON.parse(
             Buffer.from(payload, 'base64url').toString('utf8')
           )
-          _credentials.profile = claims
         }
       },
       password: azureAdB2cConfig.cookiePassword,
