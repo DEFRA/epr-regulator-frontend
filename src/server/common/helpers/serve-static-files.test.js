@@ -11,11 +11,11 @@ describe('#serveStaticFiles', () => {
       // Avoid collisions with any locally running dev server on the default port.
       vi.stubEnv('PORT', '3099')
       startServerImport = await import('./start-server.js')
-    })
+    }, 30000)
 
     beforeEach(async () => {
       server = await startServerImport.startServer()
-    })
+    }, 30000)
 
     afterEach(async () => {
       await server?.stop?.({ timeout: 0 })

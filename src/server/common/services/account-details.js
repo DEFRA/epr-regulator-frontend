@@ -1,5 +1,9 @@
 import { config } from '../../../config/config.js'
 
+function asObject(value) {
+  return value && typeof value === 'object' ? value : undefined
+}
+
 function asNonEmptyString(value) {
   if (typeof value !== 'string') return undefined
   const v = value.trim()
@@ -21,26 +25,18 @@ export function getAccountUserIdFromSessionUser(sessionUser) {
   if (typeof sessionUser === 'string') return asNonEmptyString(sessionUser)
   if (!sessionUser || typeof sessionUser !== 'object') return undefined
 
-  const credentials =
-    sessionUser.credentials && typeof sessionUser.credentials === 'object'
-      ? sessionUser.credentials
-      : {}
-
+  const credentials = asObject(sessionUser.credentials)
   const profile =
-    sessionUser.profile && typeof sessionUser.profile === 'object'
-      ? sessionUser.profile
-      : credentials.profile && typeof credentials.profile === 'object'
-        ? credentials.profile
-        : {}
+    asObject(sessionUser.profile) || asObject(credentials?.profile)
 
   return (
-    asGuidString(profile.oid) ||
-    asGuidString(profile.sub) ||
-    asGuidString(profile.userId) ||
-    asGuidString(profile.id) ||
-    asGuidString(credentials.userId) ||
-    asGuidString(credentials.user) ||
-    asGuidString(credentials.id) ||
+    asGuidString(profile?.oid) ||
+    asGuidString(profile?.sub) ||
+    asGuidString(profile?.userId) ||
+    asGuidString(profile?.id) ||
+    asGuidString(credentials?.userId) ||
+    asGuidString(credentials?.user) ||
+    asGuidString(credentials?.id) ||
     asGuidString(sessionUser.userId) ||
     asGuidString(sessionUser.user) ||
     asGuidString(sessionUser.id)
@@ -52,36 +48,25 @@ export function getAccountUserIdFromSessionUser(sessionUser) {
  * @param {any} dto
  */
 export function mapAccountDetailsDtoToViewModel(dto) {
-  const root = dto && typeof dto === 'object' ? dto : {}
-  const userCandidate =
-    root.user && typeof root.user === 'object'
-      ? root.user
-      : root.User && typeof root.User === 'object'
-        ? root.User
-        : root
+  const root = asObject(dto) || {}
 
-  const user =
-    userCandidate && typeof userCandidate === 'object' ? userCandidate : {}
+  const userCandidate = asObject(root.user) || asObject(root.User) || root
+  const user = asObject(userCandidate) || {}
 
-  const organisations = Array.isArray(user.organisations)
-    ? user.organisations
-    : Array.isArray(user.organizations)
-      ? user.organizations
-      : []
+  const organisations =
+    (Array.isArray(user.organisations) && user.organisations) ||
+    (Array.isArray(user.organizations) && user.organizations) ||
+    []
 
-  const primaryOrganisation =
-    organisations.length > 0 &&
-    organisations[0] &&
-    typeof organisations[0] === 'object'
-      ? organisations[0]
-      : {}
+  const primaryOrganisation = asObject(organisations[0])
 
-  const nationId =
-    typeof primaryOrganisation.nationId === 'number'
+  const orgNationId =
+    typeof primaryOrganisation?.nationId === 'number'
       ? primaryOrganisation.nationId
-      : typeof user.nationId === 'number'
-        ? user.nationId
-        : undefined
+      : undefined
+  const userNationId =
+    typeof user.nationId === 'number' ? user.nationId : undefined
+  const nationId = orgNationId ?? userNationId
 
   return {
     firstName: asNonEmptyString(user.firstName) || '',
@@ -92,7 +77,7 @@ export function mapAccountDetailsDtoToViewModel(dto) {
     email:
       asNonEmptyString(user.email) || asNonEmptyString(user.contactEmail) || '',
     organisationName:
-      asNonEmptyString(primaryOrganisation.name) ||
+      asNonEmptyString(primaryOrganisation?.name) ||
       asNonEmptyString(user.organisationName) ||
       '',
     nationId
@@ -101,34 +86,64 @@ export function mapAccountDetailsDtoToViewModel(dto) {
 
 export async function getAccountDetails(userId, { headers, logger } = {}) {
   const baseUrl =
-    config.get('services.accountApi.baseUrl') || 'http://localhost:8085'
-  const url = new URL(`/api/account/${encodeURIComponent(userId)}`, baseUrl)
+    config.get('services.gatewayApi.baseUrl') || 'http://localhost:8085'
+  const baseForUrl =
+    typeof baseUrl === 'string' && baseUrl.endsWith('/')
+      ? baseUrl
+      : `${baseUrl}/`
+  const url = new URL(`api/account/${encodeURIComponent(userId)}`, baseForUrl)
+
+  const basicAuthUsername = String(
+    config.get('services.gatewayApi.basicAuth.username') ?? ''
+  ).trim()
+  const basicAuthPassword = String(
+    config.get('services.gatewayApi.basicAuth.password') ?? ''
+  ).trim()
+  const basicAuthValue = (() => {
+    if (!basicAuthUsername || !basicAuthPassword) return ''
+    const credentials = `${basicAuthUsername}:${basicAuthPassword}`
+    const encoded = Buffer.from(credentials, 'utf8').toString('base64')
+    return `Basic ${encoded}`
+  })()
 
   const fetchFn = globalThis.fetch
   if (typeof fetchFn !== 'function') {
-    throw new Error('fetch is not available in this runtime')
+    throw new TypeError('fetch is not available in this runtime')
   }
 
   logger?.debug?.(
     {
+      baseUrl,
       url: url.toString(),
-      hasHeaders: Boolean(headers && typeof headers === 'object')
+      hasHeaders: Boolean(headers && typeof headers === 'object'),
+      hasBasicAuth: Boolean(basicAuthValue)
     },
     'Fetching account details from gateway'
   )
 
+  const requestHeaders = { accept: 'application/json' }
+  if (basicAuthValue) requestHeaders.authorization = basicAuthValue
+  if (headers && typeof headers === 'object') {
+    Object.assign(requestHeaders, headers)
+  }
+
   const res = await fetchFn(url, {
     method: 'GET',
-    headers: {
-      accept: 'application/json',
-      ...(headers ?? {})
-    }
+    headers: requestHeaders
   })
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '')
     const msg = `Account details request failed (${res.status} ${res.statusText})`
-    const err = new Error(body ? `${msg}: ${body}` : msg)
+    logger?.error?.(
+      {
+        url: url.toString(),
+        statusCode: res.status,
+        statusText: res.statusText
+      },
+      'Gateway account details request failed'
+    )
+
+    const err = new Error(`${msg}: ${url.toString()}`)
     err.statusCode = res.status
     throw err
   }
