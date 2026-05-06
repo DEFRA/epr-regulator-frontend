@@ -2,6 +2,7 @@
 .npm/
 .vscode
 .idea
+.vs/
 .public
 node_modules
 npm-debug.log
@@ -12,3 +13,12 @@ coverage
 tsconfig.tsbuildinfo
 .env
 certs
+
+# tools/ (keep source, ignore build output)
+tools/**/bin/
+tools/**/obj/
+tools/**/.vs/
+tools/**/TestResults/
+tools/**/*.csproj.user
+tools/**/*.suo
+tools/**/*.user
