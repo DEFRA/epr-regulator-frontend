@@ -1,5 +1,7 @@
-import { config } from '../../../config/config.js'
+import { gatewayGetJson } from './gateway-http-client.js'
 
+// Normalise a "maybe object" value: return it if it's a non-null object, otherwise `undefined`.
+// (In JS, `typeof null === 'object'`, so we must also guard against null.)
 function asObject(value) {
   return value && typeof value === 'object' ? value : undefined
 }
@@ -85,68 +87,6 @@ export function mapAccountDetailsDtoToViewModel(dto) {
 }
 
 export async function getAccountDetails(userId, { headers, logger } = {}) {
-  const baseUrl =
-    config.get('services.gatewayApi.baseUrl') || 'http://localhost:8085'
-  const baseForUrl =
-    typeof baseUrl === 'string' && baseUrl.endsWith('/')
-      ? baseUrl
-      : `${baseUrl}/`
-  const url = new URL(`api/account/${encodeURIComponent(userId)}`, baseForUrl)
-
-  const basicAuthUsername = String(
-    config.get('services.gatewayApi.basicAuth.username') ?? ''
-  ).trim()
-  const basicAuthPassword = String(
-    config.get('services.gatewayApi.basicAuth.password') ?? ''
-  ).trim()
-  const basicAuthValue = (() => {
-    if (!basicAuthUsername || !basicAuthPassword) return ''
-    const credentials = `${basicAuthUsername}:${basicAuthPassword}`
-    const encoded = Buffer.from(credentials, 'utf8').toString('base64')
-    return `Basic ${encoded}`
-  })()
-
-  const fetchFn = globalThis.fetch
-  if (typeof fetchFn !== 'function') {
-    throw new TypeError('fetch is not available in this runtime')
-  }
-
-  logger?.debug?.(
-    {
-      baseUrl,
-      url: url.toString(),
-      hasHeaders: Boolean(headers && typeof headers === 'object'),
-      hasBasicAuth: Boolean(basicAuthValue)
-    },
-    'Fetching account details from gateway'
-  )
-
-  const requestHeaders = { accept: 'application/json' }
-  if (basicAuthValue) requestHeaders.authorization = basicAuthValue
-  if (headers && typeof headers === 'object') {
-    Object.assign(requestHeaders, headers)
-  }
-
-  const res = await fetchFn(url, {
-    method: 'GET',
-    headers: requestHeaders
-  })
-
-  if (!res.ok) {
-    const msg = `Account details request failed (${res.status} ${res.statusText})`
-    logger?.error?.(
-      {
-        url: url.toString(),
-        statusCode: res.status,
-        statusText: res.statusText
-      },
-      'Gateway account details request failed'
-    )
-
-    const err = new Error(`${msg}: ${url.toString()}`)
-    err.statusCode = res.status
-    throw err
-  }
-
-  return await res.json()
+  const path = `api/account/${encodeURIComponent(userId)}`
+  return await gatewayGetJson(path, { headers, logger })
 }

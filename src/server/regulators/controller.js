@@ -9,7 +9,7 @@ import {
   getAccountDetails,
   getAccountUserIdFromSessionUser,
   mapAccountDetailsDtoToViewModel
-} from '../common/services/account-details.js'
+} from '../common/services/gateway-account-client.js'
 
 /**
  * Regulator page controller.

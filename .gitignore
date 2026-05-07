@@ -15,10 +15,4 @@ tsconfig.tsbuildinfo
 certs
 
 # tools/ (keep source, ignore build output)
-tools/**/bin/
-tools/**/obj/
-tools/**/.vs/
-tools/**/TestResults/
-tools/**/*.csproj.user
-tools/**/*.suo
-tools/**/*.user
+tools/
