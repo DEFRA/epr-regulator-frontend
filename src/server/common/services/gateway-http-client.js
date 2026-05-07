@@ -1,3 +1,19 @@
+/**
+ * Gateway API HTTP client helpers.
+ *
+ * Provides a small wrapper around `fetch` for performing GET requests to the
+ * configured gateway API and parsing JSON responses.
+ *
+ * Configuration:
+ * - `services.gatewayApi.baseUrl`: Base URL for the gateway API (defaults to
+ *   `http://localhost:8085` when not set/blank)
+ * - `services.gatewayApi.basicAuth.username` / `services.gatewayApi.basicAuth.password`:
+ *   Optional Basic Auth credentials (when both are set)
+ *
+ * Notes:
+ * - Caller may pass additional headers (merged into the request).
+ * - Caller may pass a logger supporting `debug`/`error` for request diagnostics.
+ */
 import { config } from '../../../config/config.js'
 
 function buildBaseForUrl(baseUrl) {

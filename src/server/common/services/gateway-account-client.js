@@ -1,3 +1,16 @@
+/**
+ * Gateway Account API helpers.
+ *
+ * - Extracts a stable Account user id (GUID) from a session user object that
+ *   may vary by identity provider/shape.
+ * - Maps the Account API user/organisation DTO into a stable view model for the
+ *   frontend.
+ * - Fetches account details via the gateway using `gatewayGetJson`.
+ *
+ * Network calls ultimately use the gateway API configuration/auth documented in
+ * `gateway-http-client.js`. Callers may pass through request headers and an
+ * optional logger for diagnostics.
+ */
 import { gatewayGetJson } from './gateway-http-client.js'
 
 // Normalise a "maybe object" value: return it if it's a non-null object, otherwise `undefined`.
