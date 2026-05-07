@@ -19,14 +19,17 @@ describe('#homeController', () => {
       statusText: 'OK',
       async json() {
         return {
-          userId: 'a586e22f-0df0-4a24-8048-ae7d0aabbbbc',
           firstName: 'Carl',
           lastName: 'Mason',
-          organisationName: 'Carl_BUG_TESTING',
-          nationId: 1,
+          email: 'eprqatest+RegulatorNation1@gmail.com',
           serviceRoleId: 4,
           serviceRole: 'Regulator Admin',
-          contactEmail: 'eprqatest+RegulatorNation1@gmail.com'
+          organisations: [
+            {
+              name: 'Carl_BUG_TESTING',
+              nationId: 1
+            }
+          ]
         }
       }
     }))
