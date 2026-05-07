@@ -68,7 +68,7 @@ export async function gatewayGetJson(path, { headers, logger } = {}) {
   const requestHeaders = { accept: 'application/json' }
   if (basicAuthValue) requestHeaders.authorization = basicAuthValue
   if (headers && typeof headers === 'object') {
-    Object.assign(requestHeaders, headers)
+    Object.assign(requestHeaders, headers) //if the caller provided extra headers (e.g. correlation ID), merge them into requestHeaders.
   }
 
   const res = await fetchFn(url, {
