@@ -2,7 +2,7 @@
 .npm/
 .vscode
 .idea
-.vs/
+
 .public
 node_modules
 npm-debug.log
@@ -14,5 +14,3 @@ tsconfig.tsbuildinfo
 .env
 certs
 
-# tools/ (keep source, ignore build output)
-tools/
