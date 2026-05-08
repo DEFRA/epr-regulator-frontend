@@ -15,6 +15,11 @@ export ACCOUNT_API_BASE_URL=""
 # export AUTH_COOKIE_PASSWORD="at-least-32-characters-long-secret-password"
 export AUTH_COOKIE_SECURE="false" # Set to false for local HTTP development
 
+# epr-regulator-gateway API
+export GATEWAY_API_BASE_URL="http://localhost:8085/"
+export GATEWAY_API_BASIC_AUTH_USERNAME=""
+export GATEWAY_API_BASIC_AUTH_PASSWORD=""
+
 # Application Configuration
 export PORT=7154
 export NODE_ENV="development"

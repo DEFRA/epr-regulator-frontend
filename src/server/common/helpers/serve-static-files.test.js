@@ -1,21 +1,31 @@
+import path from 'node:path'
+import hapi from '@hapi/hapi'
+import inert from '@hapi/inert'
 import { vi } from 'vitest'
 import { statusCodes } from '../constants/status-codes.js'
+import { config } from '../../../config/config.js'
+import { serveStaticFiles } from './serve-static-files.js'
 
 describe('#serveStaticFiles', () => {
   let server
-  /** @type {{ startServer: () => Promise<any> } | undefined} */
-  let startServerImport
 
   describe('When secure context is disabled', () => {
-    beforeAll(async () => {
-      // Avoid collisions with any locally running dev server on the default port.
-      vi.stubEnv('PORT', '3099')
-      startServerImport = await import('./start-server.js')
-    })
-
     beforeEach(async () => {
-      server = await startServerImport.startServer()
-    })
+      vi.stubEnv('ENABLE_SECURE_CONTEXT', 'false')
+
+      server = hapi.server({
+        host: 'localhost',
+        port: 0,
+        routes: {
+          files: {
+            relativeTo: path.resolve(config.get('root'), '.public')
+          }
+        }
+      })
+
+      await server.register([inert, serveStaticFiles])
+      await server.initialize()
+    }, 30000)
 
     afterEach(async () => {
       await server?.stop?.({ timeout: 0 })

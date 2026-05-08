@@ -2,6 +2,7 @@
 .npm/
 .vscode
 .idea
+
 .public
 node_modules
 npm-debug.log
@@ -12,3 +13,4 @@ coverage
 tsconfig.tsbuildinfo
 .env
 certs
+

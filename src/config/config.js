@@ -292,12 +292,27 @@ export const config = convict({
     }
   },
   services: {
-    accountApi: {
+    gatewayApi: {
       baseUrl: {
         doc: 'Regulator Gateway base URL for account endpoints (e.g. http://localhost:8085)',
         format: String,
         default: 'http://localhost:8085',
-        env: 'ACCOUNT_API_BASE_URL'
+        env: 'GATEWAY_API_BASE_URL'
+      },
+      basicAuth: {
+        username: {
+          doc: 'Optional HTTP Basic Auth username for gateway API',
+          format: String,
+          default: '',
+          env: 'GATEWAY_API_BASIC_AUTH_USERNAME'
+        },
+        password: {
+          doc: 'Optional HTTP Basic Auth password for gateway API',
+          format: String,
+          default: '',
+          env: 'GATEWAY_API_BASIC_AUTH_PASSWORD',
+          sensitive: true
+        }
       }
     }
   }
