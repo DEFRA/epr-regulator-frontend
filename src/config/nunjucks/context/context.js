@@ -29,6 +29,9 @@ export function context(request) {
     serviceUrl: '/',
     breadcrumbs: [],
     navigation: buildNavigation(request),
+    features: {
+      certificateOfCompliance: config.get('features.certificateOfCompliance')
+    },
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`

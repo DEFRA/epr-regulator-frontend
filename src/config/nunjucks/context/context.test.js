@@ -61,7 +61,10 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'epr-regulator-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          features: {
+            certificateOfCompliance: false
+          }
         })
       })
 
@@ -150,7 +153,10 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'epr-regulator-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          features: {
+            certificateOfCompliance: false
+          }
         })
       })
     })

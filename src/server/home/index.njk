@@ -10,6 +10,9 @@
     <div class="govuk-grid-column-two-thirds">
       <div class="govuk-body" data-testid="app-page-body">
         <p><a href="/regulators/home" class="govuk-link">Regulator Dashboard</a></p>
+        {% if features.certificateOfCompliance %}
+          <p>Certificate of Compliance placeholder</p>
+        {% endif %}
       </div>
     </div>
   </div>

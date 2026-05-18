@@ -1,3 +1,4 @@
+import { config } from '../../config/config.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 
 /**
@@ -5,6 +6,13 @@ import { statusCodes } from '../common/constants/status-codes.js'
  */
 export const healthController = {
   handler(_request, h) {
-    return h.response({ message: 'success' }).code(statusCodes.ok)
+    return h
+      .response({
+        message: 'success',
+        features: {
+          certificateOfCompliance: config.get('features.certificateOfCompliance')
+        }
+      })
+      .code(statusCodes.ok)
   }
 }

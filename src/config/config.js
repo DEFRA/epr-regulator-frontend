@@ -291,6 +291,14 @@ export const config = convict({
       }
     }
   },
+  features: {
+    certificateOfCompliance: {
+      doc: 'Enable the Certificate of Compliance feature',
+      format: Boolean,
+      default: false,
+      env: 'FEATURE_CERTIFICATE_OF_COMPLIANCE'
+    }
+  },
   services: {
     gatewayApi: {
       baseUrl: {
