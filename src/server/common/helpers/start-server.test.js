@@ -41,7 +41,10 @@ describe('#startServer', () => {
         url: '/health'
       })
 
-      expect(result).toEqual({ message: 'success' })
+      expect(result).toEqual({
+        message: 'success',
+        features: { certificateOfCompliance: false }
+      })
       expect(statusCode).toBe(statusCodes.ok)
     })
   })
