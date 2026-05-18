@@ -10,7 +10,9 @@ export const healthController = {
       .response({
         message: 'success',
         features: {
-          certificateOfCompliance: config.get('features.certificateOfCompliance')
+          certificateOfCompliance: config.get(
+            'features.certificateOfCompliance'
+          )
         }
       })
       .code(statusCodes.ok)
