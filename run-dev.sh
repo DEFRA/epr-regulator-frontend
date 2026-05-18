@@ -24,13 +24,5 @@ export GATEWAY_API_BASIC_AUTH_PASSWORD=""
 export PORT=7154
 export NODE_ENV="development"
 
-# Terminate anything running on the application port
-echo "Checking for any process running on port $PORT..."
-PID=$(lsof -ti :$PORT)
-if [ -n "$PID" ]; then
-  echo "Terminating process $PID running on port $PORT..."
-  kill -9 "$PID"
-fi
-
 # Run the application
 npm run dev
