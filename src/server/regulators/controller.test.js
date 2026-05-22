@@ -21,15 +21,11 @@ describe('#homeController', () => {
         return {
           firstName: 'Carl',
           lastName: 'Mason',
-          email: 'eprqatest+RegulatorNation1@gmail.com',
+          contactEmail: 'eprqatest+RegulatorNation1@gmail.com',
           serviceRoleId: 4,
           serviceRole: 'Regulator Admin',
-          organisations: [
-            {
-              name: 'Carl_BUG_TESTING',
-              nationId: 1
-            }
-          ]
+          organisationName: 'Carl_BUG_TESTING',
+          nationId: 1
         }
       }
     }))

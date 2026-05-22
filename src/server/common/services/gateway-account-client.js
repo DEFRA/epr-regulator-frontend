@@ -2,8 +2,9 @@
  * Gateway Account API helpers.
  *
  * - Resolves Account user id (GUID) from the session Bell credentials shape.
- * - Maps gateway `GET api/account/{userId}` JSON (Backend `UserDetailsModel`) to the
- *   regulator view model. ASP.NET Core JSON uses camelCase by default (`organisations`).
+ * - Maps gateway `GET api/account/{userId}` JSON (Gateway `AccountDetailsResponse`,
+ *   already flattened to the primary organisation) to the regulator view model.
+ *   ASP.NET Core JSON uses camelCase by default.
  * - Fetches account details via `gatewayGetJson`.
  */
 import { gatewayGetJson } from './gateway-http-client.js'
@@ -35,21 +36,18 @@ export function getAccountUserIdFromSessionUser(sessionUser) {
 }
 
 /**
- * Map Account API DTO (Backend `UserDetailsModel`, camelCase JSON from ASP.NET Core).
+ * Map Account API DTO (Gateway `AccountDetailsResponse`, camelCase JSON from ASP.NET Core).
  * @param {*} dto
  */
 export function mapAccountDetailsDtoToViewModel(dto) {
-  const organisations = dto.organisations ?? []
-  const primaryOrganisation = organisations[0]
-
   return {
     firstName: trimmed(dto.firstName),
     lastName: trimmed(dto.lastName),
     serviceRole: trimmed(dto.serviceRole ?? ''),
     serviceRoleId: dto.serviceRoleId,
-    email: trimmed(dto.email ?? ''),
-    organisationName: trimmed(primaryOrganisation?.name ?? ''),
-    nationId: primaryOrganisation?.nationId
+    email: trimmed(dto.contactEmail ?? ''),
+    organisationName: trimmed(dto.organisationName ?? ''),
+    nationId: dto.nationId
   }
 }
 
