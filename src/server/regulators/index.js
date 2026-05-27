@@ -1,5 +1,4 @@
 import {
-  homeController,
   signinOidcController,
   signOutController,
   signedOutController
@@ -10,14 +9,6 @@ export const regulators = {
     name: 'regulators',
     register(server) {
       server.route([
-        {
-          method: 'GET',
-          path: '/regulators/home',
-          options: {
-            auth: false,
-            ...homeController
-          }
-        },
         {
           method: ['GET', 'POST'],
           path: '/regulators/signin-oidc',
